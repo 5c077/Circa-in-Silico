@@ -1,3 +1,7 @@
 enableBookmarking("url")
 library("data.table")
 library("dplyr")
+library("ggplot2")
+library("tidyr")
+library("stringr")
+library("gtools")

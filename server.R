@@ -9,12 +9,15 @@ function(input, output, session)  observe(
   batch <-input$batch # larger batch for statistically significant testing
   batch[is.na(batch)]<- 1
   batch[batch<=1]<-1
-  timepoints <- input$timepoints*reps/sample.interval
+  timepoints <- input$timepoints*reps
   timepoints[is.na(timepoints)]<- 999
   timepoints[timepoints==0]<-2
   timepoints[timepoints<=1]<-2
+  duration<-input$timepoints
+  duration[is.na(duration)]<-5
+  duration[duration<=sample.interval]<-sample.interval
   records <- input$batch
-  records[is.na(records)]<- 999
+  records[is.na(records)]<- 5
   records[records==0]<-2
   records[records<=1]<-2
   cos.amplitude.max <- input$cos.amplitude.max      # maximum Affymetrix log2 oscillation amplitude
@@ -23,24 +26,22 @@ function(input, output, session)  observe(
   cos.period.max <- input$cos.period.max
   outlier.amplitude <- input$outlier.amplitude # same as before so higher amplitudes can be more reliable
   percent.rhythmic<-input$rhythm/100
+  subset<-seq(from=sample.interval, to=duration, by=sample.interval)
   display<-input$timepoints/input$sample
   display[is.na(display)]<-"?"
-  
   output$calc.timepoints<-renderText({c("Timepoints =",display)})
   set.seed(111)               # initialize RNG so we can compare results (previously 7)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   noise <- rnorm(records*timepoints)
   noise<- matrix(noise, records, timepoints)  #dim(noise) <- c(records,timepoints) 
   
-  outliers.pos <- rep(c(outlier.amplitude,rep(0,timepoints/reps*sample.interval-1)),batch*0.25*reps/sample.interval) 
-  outliers.neg <- rep(c(-outlier.amplitude,rep(0,timepoints/reps*sample.interval-1)),batch*0.25*reps/sample.interval) 
-  outliers.non <- rep(c(rep(0, timepoints/reps*sample.interval)),batch*0.5*reps/sample.interval)
+  outliers.pos <- rep(c(outlier.amplitude,rep(0,timepoints/reps-1)),batch*0.25*reps) 
+  outliers.neg <- rep(c(-outlier.amplitude,rep(0,timepoints/reps-1)),batch*0.25*reps) 
+  outliers.non <- rep(c(rep(0, timepoints/reps)),batch*0.5*reps)
   outliers <- c(outliers.pos,outliers.neg,outliers.non)
-  outliers <- matrix(outliers, timepoints, records)        
-  outliers <- t(apply(outliers,2,sample))       # randomize outlier timing
-  outliers <- outliers[sample(1:records),]# randomize outlier type (pos, neg, non)
-  
-  #outliers<-outliers[,seq(from=sample.interval, to=timepoints, by=sample.interval)]
+  outliers <- matrix(outliers, records, timepoints)        
+  outliers <- apply(outliers,2,sample)       # randomize outlier timing
+  outliers <- outliers[,sample(1:timepoints)]#[sample(1:records),]# randomize outlier type (pos, neg, non)
   
   cos.amplitudes <- c(runif(
     percent.rhythmic*batch,cos.amplitude.min,cos.amplitude.max),rep(0,batch))
@@ -62,20 +63,27 @@ function(input, output, session)  observe(
   ####################
   
   cos.parameters <- cos.parameters[shuffle,]
-  
+ 
   test.data4 <-data.table(signals +noise +outliers)
-  #test.data4<-test.data4[,seq(from=sample.interval, to=timepoints, by=sample.interval),with=FALSE]
-  #test.data4<-test.data4[,seq(from=reps, to=timepoints, by=reps),with=FALSE]
-
-  output1<-data.table(test.data4, cos.amplitudes, cos.periods, cos.lag.factors) %>%
-    setNames(c(apply(expand.grid("Rep:", 1:reps,"Hr:",seq(from=sample.interval, to= timepoints/reps*sample.interval, by=sample.interval)),1, paste, collapse=" "),"Cosine Amplitude", "Cosine Periods", "Cosine Lag Factors"))
+  names<-c(apply(expand.grid(seq(from=sample.interval, to=duration, by=sample.interval), 1:reps),1, paste, collapse="."),"Cosine Amplitude", "Cosine Periods", "Cosine Lag Factors")
   
-  #graph<-rowMeans(test.data4)
-  #graph<-data.frame(test.data4)
+  sample.interval[sample.interval>=ncol(test.data4)]<-ncol(test.data4)
+  cal<-rep(subset,reps)*1:reps
+    cal[cal>ncol(test.data4)]<-ncol(test.data4)
+  cal.wrong<-rep(subset,reps)
+    cal.wrong[cal.wrong>ncol(test.data4)]<-ncol(test.data4)
+  if (input$cat==TRUE) {test.data5<-test.data4[, c(cal.wrong), with=FALSE]}
+  else {test.data5<-test.data4[, c(cal), with=FALSE]}
   
-  #output$average_graph<-renderPlot({qplot("points", "expr",data=graph, geom="line")})
-  #colnames(output1)<- c(apply(expand.grid(seq(from=sample.interval, to=input$timepoints, by=sample.interval),seq(from=1, to=reps, by=1)),1, paste, collapse = "."), "Cosine Amplitude", "Cosine Periods", "Cosine Lag Factors")#c(rep(1:input$replicates, input$timepoints))
+  output1<-data.table(test.data5, cos.amplitudes, cos.periods, cos.lag.factors) %>%
+    setNames(names)
+  if (input$sort.by==FALSE) {setcolorder(output1, c(mixedsort(colnames(output1[,1:ncol(test.data5)]),decreasing = FALSE),"Cosine Amplitude", "Cosine Periods", "Cosine Lag Factors"))}
+  
+  
   output$downloadData<-downloadHandler(filename = function(){ paste('CIS_data_', Sys.Date(), '.csv', sep='')}, content=function(file) {write.csv(output1, file)}) 
+ 
+  
+  #output$average_graph<-renderPlot({ggplot(data=melted,aes(1, 1))+geom_line()+geom_point()})
   
   enableBookmarking = "url"
   })
