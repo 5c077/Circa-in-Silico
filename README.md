@@ -4,7 +4,7 @@ Circa in Silico is a web-based application that uses standard algorithms to rend
 Getting Started:
 
 Click on the boxes on the left to manipulate the parameters by either entering a value or using the arrows.
-After programming the desired values, use the "Download" button to retrieve the raw data file for local visualisation in a variety of platforms (R, MatLab, Excel, etc).
+After programming the desired values, use the "Download" button to retrieve the raw data file for local visualisation on a variety of platforms (R, MatLab, Excel, etc).
 
 
 For External use, please cite: 
