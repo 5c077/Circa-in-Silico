@@ -69,15 +69,14 @@ function(input, output, session)  observe(
   
   sample.interval[sample.interval>=ncol(test.data4)]<-ncol(test.data4)
   cal<-rep(subset,reps)*1:reps
-    cal[cal>ncol(test.data4)]<-ncol(test.data4)
-  cal.wrong<-rep(subset,reps)
-    cal.wrong[cal.wrong>ncol(test.data4)]<-ncol(test.data4)
-  if (input$cat==TRUE) {test.data5<-test.data4[, c(cal.wrong), with=FALSE]}
-  else {test.data5<-test.data4[, c(cal), with=FALSE]}
-  
+   cal[cal>ncol(test.data4)]<-ncol(test.data4)
+    test.data5<-test.data4
+    test.data5<-test.data4[, c(cal), with=FALSE]
   output1<-data.table(test.data5, cos.amplitudes, cos.periods, cos.lag.factors) %>%
     setNames(names)
-  if (input$sort.by==FALSE) {setcolorder(output1, c(mixedsort(colnames(output1[,1:ncol(test.data5)]),decreasing = FALSE),"Cosine Amplitude", "Cosine Periods", "Cosine Lag Factors"))}
+  if (input$sort.by==TRUE) {
+    setcolorder(output1, c(mixedsort(colnames(output1[,1:ncol(test.data5)]),decreasing = FALSE),"Cosine Amplitude", "Cosine Periods", "Cosine Lag Factors"))
+    }
   
   
   output$downloadData<-downloadHandler(filename = function(){ paste('CIS_data_', Sys.Date(), '.csv', sep='')}, content=function(file) {write.csv(output1, file)}) 

@@ -1,9 +1,9 @@
-# ui.R
+
 function(request)  {
 
   fluidPage(
     tags$head(includeScript("google-analytics.js")),
-    titlePanel(title=HTML("<strong>Circa in Silico <small>(beta)</small></strong>"), windowTitle="CircaInSilico"),
+    titlePanel(title=HTML("<b><em>CircaInSilico <small>(beta)</small></em></b>"), windowTitle="CircaInSilico"),
     
     sidebarLayout(
       sidebarPanel(
@@ -19,7 +19,10 @@ function(request)  {
         sliderInput(inputId="rhythm", label="Percent Rhythmic", min=0, max=100, value=50)
         #numericInput("seed", "set.seed", min = 1, max = 20, value = 9),
         ),
-    mainPanel(checkboxInput("cat", "Replicate by Concatenation?", value = FALSE),checkboxInput("sort.by", "Sort by Replicate?", value = FALSE), downloadButton("downloadData", "Download"),bookmarkButton(), h3(textOutput("calc.timepoints"), plotOutput("average_graph"))
-    )),
+    mainPanel(#checkboxInput("cat", "Replicate by Concatenation?", value = FALSE),
+              checkboxInput("sort.by", "Group Replicates", value = TRUE), 
+      downloadButton("downloadData", "Download"),bookmarkButton(), h3(textOutput("calc.timepoints"), plotOutput("average_graph"))
+    )
+    ),
     
     wellPanel(helpText( a("Need help getting started?", target="_blank", href="https://github.com/5c077/Circa-in-Silico/blob/master/README.md"))))}
