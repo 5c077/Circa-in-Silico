@@ -12,7 +12,7 @@ For External use, please cite:
 1. Hughes et al. JBR "Guidelines for genome-scale circadian analysis (In preparation)
 2. Hughes et al. JBR (2010) JTK_Cycle [...]
 
-Below are a few visualisations that showcase CircaInSilicos utility in designing an experiment:
+Below are a few visualisations that showcase the utility of CircaInSilico in designing an experiment:
 
 ![](https://cloud.githubusercontent.com/assets/20480999/26688583/ab17747c-46b8-11e7-9bcc-ddf59eacd810.png)
 ![](https://cloud.githubusercontent.com/assets/20480999/26688590/b08034da-46b8-11e7-99d8-f67665046af4.png)
