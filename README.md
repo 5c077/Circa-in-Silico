@@ -9,7 +9,7 @@ After programming the desired values, use the "Download" button to retrieve the 
 
 For External use, please cite: 
 
-1. Hughes et al. JBR "Guidelines for Genome-Scale Analysis of Circadian Rhythms"
+1. Hughes et al. JBR "Guidelines for Genome-Scale Analysis of Biological Rhythms"
 2. Hughes et al. JBR (2010) JTK_Cycle [...]
 
 Below are a few visualisations that showcase the utility of CircaInSilico in studying circadian rhythms:
